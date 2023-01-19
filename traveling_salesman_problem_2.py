@@ -72,13 +72,18 @@ def get_nearest_neighbor(points):
         for i in range(len(points_temp)):
             if get_distance(best_path[-1],points_temp[i])<get_distance(best_path[-1],nearest_neighbor):
                 nearest_neighbor=points_temp[i]
+               
         # append nearest neighbor to the best path
         best_path.append(nearest_neighbor)
         # remove nearest neighbor from points
         points_temp.remove(nearest_neighbor)
+    # get new distance
+    best_distance=get_distance(best_path[0],best_path[-1])
+    for i in range(len(best_path)-1):
+        best_distance+=get_distance(best_path[i],best_path[i+1])            
     # append first point to the end of the list
     best_path.append(best_path[0])      
-    return best_path
+    return best_path, best_distance
 
 # function for the nearest neighbor point with optimal path
 def get_optimal_nearest_neighbor(points):
@@ -174,43 +179,30 @@ def get_optimize_path(best_path, best_distance):
     # define variables
     new_path=best_path; original_path=best_path; new_distance=best_distance
     # exchange of elements in the field        
-    for i in range(0,len(best_path)-4,1):
-        if i<len(best_path)-4:
-            # get permutations                   
-            combin=list(permutations(range(i+1,i+5),4))            
-            for j in range(0,len(combin)-1):
-                # get new path
-                new_path=original_path[:]
-                new_path[i+1]=original_path[combin[j][0]]
-                new_path[i+2]=original_path[combin[j][1]]
-                new_path[i+3]=original_path[combin[j][2]]
-                new_path[i+4]=original_path[combin[j][3]]               
-                # get new distance
-                new_distance=get_distance(new_path[0],new_path[-1])
-                for k in range(len(new_path)-1):
-                    new_distance+=get_distance(new_path[k],new_path[k+1])
-                # if new distance is better than best distance
-                if new_distance<best_distance:
-                    best_path=new_path[:]
-                    best_distance=new_distance
-        else:
-            # get permutations                   
-            combin=list(permutations(range(i+1,i+4),3))
-            print(combin)
-            for j in range(0,len(combin)-1):
-                # get new path
-                new_path=original_path[:]
-                new_path[i+1]=original_path[combin[j][0]]
-                new_path[i+2]=original_path[combin[j][1]]
-                new_path[i+3]=original_path[combin[j][2]]                
-                # get new distance
-                new_distance=get_distance(new_path[0],new_path[-1])
-                for k in range(len(new_path)-1):
-                    new_distance+=get_distance(new_path[k],new_path[k+1])
-                # if new distance is better than best distance
-                if new_distance<best_distance:
-                    best_path=new_path[:]
-                    best_distance=new_distance                         
+    for i in range(0,len(best_path)-1,1):        
+        # get permutations
+        index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4
+        if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
+        if index_2>len(best_path)-1: index_2=index_2-len(best_path)+1
+        if index_3>len(best_path)-1: index_3=index_3-len(best_path)+1
+        if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1                           
+        combin=list(permutations((index_1, index_2, index_3, index_4),4))                    
+        for j in range(0,len(combin)-1):
+            # get new path
+            new_path=original_path[:]
+            new_path[index_1]=original_path[combin[j][0]]
+            new_path[index_2]=original_path[combin[j][1]]
+            new_path[index_3]=original_path[combin[j][2]]
+            new_path[index_4]=original_path[combin[j][3]]               
+            # get new distance
+            new_distance=get_distance(new_path[0],new_path[-1])
+            for k in range(len(new_path)-1):
+                new_distance+=get_distance(new_path[k],new_path[k+1])
+            # if new distance is better than best distance
+            if new_distance<best_distance:
+                best_path=new_path[:]
+                best_distance=new_distance
+                                 
     return best_path, best_distance
 
 # Infinite while loop console. Main program
@@ -227,7 +219,8 @@ while True:
     # call function for simulated annealing
     best_path,best_distance=get_simulated_annealing(points)            
     print("Best path -simulated annealing:")
-    print(best_path,best_distance)    
+    print(best_path)
+    print(f'Best distance -simulated annealing: {best_distance}')    
     # plot best path simulating the salesman
     plt.title("Plot of best path : simulated annealing")
     plt.grid(True)
@@ -236,22 +229,18 @@ while True:
     # call function for nearest neighbor
     best_path_narest_neighbor=get_nearest_neighbor(points)    
     print("Best path -nearest neighbor:")
-    print(best_path_narest_neighbor)
-    # define variables
-    new_distance_narest_neighbor=0
-    # get distance
-    for i in range(len(best_path_narest_neighbor)-1):
-        new_distance_narest_neighbor+=get_distance(best_path_narest_neighbor[i],best_path_narest_neighbor[i+1])
-    print(f'Best distance -nearest neighbor: {new_distance_narest_neighbor}')
-    # plot best path simulating the salesman
+    print(best_path_narest_neighbor[0])    
+    print(f'Best distance -nearest neighbor: {best_path_narest_neighbor[1]}')
+    # plot best path nearest neighbor
     plt.title("Plot of best path : nearest neighbor")
     plt.grid(True)
-    plt.plot([x for (x,y) in best_path_narest_neighbor],[y for (x,y) in best_path_narest_neighbor],'ko-')
+    plt.plot([x for (x,y) in best_path_narest_neighbor[0]],[y for (x,y) in best_path_narest_neighbor[0]],'ko-')
     plt.show()    
     # call function for optimal nearest neighbor
     optimal_path=get_optimal_nearest_neighbor(points)
-    print("Best path -best nearest neighbor:")
-    print(optimal_path)        
+    print("Best path - optimal nearest neighbor:")
+    print(optimal_path[0])
+    print(f'Best distance -optimal nearest neighbor: {optimal_path[1]}')        
     # plot best path for optimal nearest neighbor
     plt.title("Plot of best path : optimal nearest neighbor")
     plt.grid(True)
@@ -263,7 +252,7 @@ while True:
     print("Best path -optimize optimal nearest neighbor:")
     print(best_path_criss_cross)
     # plot best path for criss-cross algorithm
-    plt.title("Plot of best path : ptimize optimal nearest neighbor")
+    plt.title("Plot of best path : Optimize optimal nearest neighbor")
     plt.grid(True)
     plt.plot([x for (x,y) in best_path_criss_cross[0]],[y for (x,y) in best_path_criss_cross[0]],'ko-')
     plt.show()   
