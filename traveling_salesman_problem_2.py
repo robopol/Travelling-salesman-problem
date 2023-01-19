@@ -220,7 +220,7 @@ def get_optimize_path(best_path, best_distance):
     # define variables
     new_path=best_path; original_path=best_path; new_distance=best_distance
     # exchange of elements in the field        
-    for i in range(0,len(best_path)-1,1):        
+    for i in range(0,len(best_path)-1+int(0.2*len(best_path)),1):        
         # get permutations
         index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5
         if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
