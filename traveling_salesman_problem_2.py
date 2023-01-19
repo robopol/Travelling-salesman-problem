@@ -90,44 +90,85 @@ def get_optimal_nearest_neighbor(points):
     # define variables
     best_path=[]; new_path=[];points_temp=[];best_distance=0; new_distance=0; nearest_neighbor=0  
     
-    for i in range(len(points)):
-        # get first point for new path
-        new_path.append(points[i])
-        # remove first point from points
-        points_temp=points[:]
-        points_temp.remove(points[i])
-        # get nearest neighbor
-        nearest_neighbor=points_temp[0]
-        for i in range(len(points_temp)):
-            if get_distance(new_path[-1],points_temp[i])<get_distance(new_path[-1],nearest_neighbor):
-                nearest_neighbor=points_temp[i]
-        # append nearest neighbor to the new path
-        new_path.append(nearest_neighbor)
-        # remove nearest neighbor from points_temp
-        points_temp.remove(nearest_neighbor)
-        # while loop
-        while len(points_temp)>0:
+    if len(points)<200:        
+        for i in range(len(points)):
+            # get first point for new path
+            new_path.append(points[i])
+            # remove first point from points
+            points_temp=points[:]
+            points_temp.remove(points[i])
             # get nearest neighbor
             nearest_neighbor=points_temp[0]
             for i in range(len(points_temp)):
                 if get_distance(new_path[-1],points_temp[i])<get_distance(new_path[-1],nearest_neighbor):
                     nearest_neighbor=points_temp[i]
-            # append nearest neighbor to the best path
+            # append nearest neighbor to the new path
             new_path.append(nearest_neighbor)
             # remove nearest neighbor from points_temp
             points_temp.remove(nearest_neighbor)
-        # append first point to the end of the list
-        new_path.append(new_path[0])
-        # get new distance
-        new_distance=get_distance(new_path[0],new_path[-1])
-        for i in range(len(new_path)-1):        
-            new_distance+=get_distance(new_path[i],new_path[i+1])
-        # if new distance is better than best distance
-        if new_distance<best_distance or best_distance==0:
-            best_distance=new_distance
-            best_path=new_path[:]
-        # clear new path
-        new_path.clear()          
+            # while loop
+            while len(points_temp)>0:
+                # get nearest neighbor
+                nearest_neighbor=points_temp[0]
+                for i in range(len(points_temp)):
+                    if get_distance(new_path[-1],points_temp[i])<get_distance(new_path[-1],nearest_neighbor):
+                        nearest_neighbor=points_temp[i]
+                # append nearest neighbor to the best path
+                new_path.append(nearest_neighbor)
+                # remove nearest neighbor from points_temp
+                points_temp.remove(nearest_neighbor)
+            # append first point to the end of the list
+            new_path.append(new_path[0])
+            # get new distance
+            new_distance=get_distance(new_path[0],new_path[-1])
+            for i in range(len(new_path)-1):        
+                new_distance+=get_distance(new_path[i],new_path[i+1])
+            # if new distance is better than best distance
+            if new_distance<best_distance or best_distance==0:
+                best_distance=new_distance
+                best_path=new_path[:]
+            # clear new path
+            new_path.clear()                               
+    else:
+        for i in range(200):
+            # get first randompoint for new path
+            rand=random.randint(0,len(points)-1)
+            new_path.append(points[rand])
+            # remove first point from points
+            points_temp=points[:]
+            points_temp.remove(points[rand])
+            # get nearest neighbor
+            nearest_neighbor=points_temp[0]
+            for i in range(len(points_temp)):
+                if get_distance(new_path[-1],points_temp[i])<get_distance(new_path[-1],nearest_neighbor):
+                    nearest_neighbor=points_temp[i]
+            # append nearest neighbor to the new path
+            new_path.append(nearest_neighbor)
+            # remove nearest neighbor from points_temp
+            points_temp.remove(nearest_neighbor)
+            # while loop
+            while len(points_temp)>0:
+                # get nearest neighbor
+                nearest_neighbor=points_temp[0]
+                for i in range(len(points_temp)):
+                    if get_distance(new_path[-1],points_temp[i])<get_distance(new_path[-1],nearest_neighbor):
+                        nearest_neighbor=points_temp[i]
+                # append nearest neighbor to the best path
+                new_path.append(nearest_neighbor)
+                # remove nearest neighbor from points_temp
+                points_temp.remove(nearest_neighbor)
+            # append first point to the end of the list
+            new_path.append(new_path[0])
+            # get new distance
+            new_distance=get_distance(new_path[0],new_path[-1])
+            for i in range(len(new_path)-1):        
+                new_distance+=get_distance(new_path[i],new_path[i+1])
+            # if new distance is better than best distance
+            if new_distance<best_distance or best_distance==0:
+                best_distance=new_distance
+                best_path=new_path[:]            
+            # clear new path
+            new_path.clear()                  
     return best_path,best_distance      
 
 # function for simulated annealing
@@ -181,19 +222,21 @@ def get_optimize_path(best_path, best_distance):
     # exchange of elements in the field        
     for i in range(0,len(best_path)-1,1):        
         # get permutations
-        index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4
+        index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5
         if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
         if index_2>len(best_path)-1: index_2=index_2-len(best_path)+1
         if index_3>len(best_path)-1: index_3=index_3-len(best_path)+1
-        if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1                           
-        combin=list(permutations((index_1, index_2, index_3, index_4),4))                    
+        if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1
+        if index_5>len(best_path)-1: index_5=index_5-len(best_path)+1                           
+        combin=list(permutations((index_1, index_2, index_3, index_4, index_5),5))                    
         for j in range(0,len(combin)-1):
             # get new path
             new_path=original_path[:]
             new_path[index_1]=original_path[combin[j][0]]
             new_path[index_2]=original_path[combin[j][1]]
             new_path[index_3]=original_path[combin[j][2]]
-            new_path[index_4]=original_path[combin[j][3]]               
+            new_path[index_4]=original_path[combin[j][3]]
+            new_path[index_5]=original_path[combin[j][4]]
             # get new distance
             new_distance=get_distance(new_path[0],new_path[-1])
             for k in range(len(new_path)-1):
