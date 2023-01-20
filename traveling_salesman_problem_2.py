@@ -90,7 +90,7 @@ def get_optimal_nearest_neighbor(points):
     # define variables
     best_path=[]; new_path=[];points_temp=[];best_distance=0; new_distance=0; nearest_neighbor=0  
     
-    if len(points)<200:        
+    if len(points)<100:        
         for i in range(len(points)):
             # get first point for new path
             new_path.append(points[i])
@@ -130,7 +130,7 @@ def get_optimal_nearest_neighbor(points):
             # clear new path
             new_path.clear()                               
     else:
-        for i in range(200):
+        for i in range(100):
             # get first randompoint for new path
             rand=random.randint(0,len(points)-1)
             new_path.append(points[rand])
@@ -217,10 +217,12 @@ def get_simulated_annealing(points):
 
 # optimize permutations best path
 def get_optimize_path(best_path, best_distance):
+    # remove end point from best path
+    best_path.pop(-1)
     # define variables
-    new_path=best_path; original_path=best_path; new_distance=best_distance
+    new_path=best_path; new_distance=best_distance    
     # exchange of elements in the field        
-    for i in range(0,len(best_path)-1+int(0.2*len(best_path)),1):        
+    for i in range(0,len(best_path)-1,1):        
         # get permutations
         index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5
         if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
@@ -231,12 +233,12 @@ def get_optimize_path(best_path, best_distance):
         combin=list(permutations((index_1, index_2, index_3, index_4, index_5),5))                    
         for j in range(0,len(combin)-1):
             # get new path
-            new_path=original_path[:]
-            new_path[index_1]=original_path[combin[j][0]]
-            new_path[index_2]=original_path[combin[j][1]]
-            new_path[index_3]=original_path[combin[j][2]]
-            new_path[index_4]=original_path[combin[j][3]]
-            new_path[index_5]=original_path[combin[j][4]]
+            new_path=best_path[:]
+            new_path[index_1]=best_path[combin[j][0]]
+            new_path[index_2]=best_path[combin[j][1]]
+            new_path[index_3]=best_path[combin[j][2]]
+            new_path[index_4]=best_path[combin[j][3]]
+            new_path[index_5]=best_path[combin[j][4]]
             # get new distance
             new_distance=get_distance(new_path[0],new_path[-1])
             for k in range(len(new_path)-1):
@@ -245,7 +247,8 @@ def get_optimize_path(best_path, best_distance):
             if new_distance<best_distance:
                 best_path=new_path[:]
                 best_distance=new_distance
-                                 
+    # append first point to the end of the list
+    best_path.append(best_path[0])                                 
     return best_path, best_distance
 
 # Infinite while loop console. Main program
