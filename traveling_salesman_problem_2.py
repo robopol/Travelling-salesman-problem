@@ -3,6 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import random
 from itertools import permutations
+from shapely.geometry import LineString
 print("""
 ****************************************************************************************
 Travelling salesman problem : 
@@ -45,6 +46,19 @@ def get_random_points(num_points):
 # function for distance between two points
 def get_distance(point1,point2):
     return math.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2)
+
+# function intersection
+def check_intersection(points):
+    lines = []
+    # Create line segments from points
+    for i in range(len(points) - 1):
+        lines.append(LineString([points[i], points[i+1]]))
+    # Check intersection for each segment
+    for i in range(len(lines) - 1):
+        for j in range(i+1, len(lines)):
+            if lines[i].intersects(lines[j]):
+                return True
+    return False
     
 # function for the nearest neighbor point
 def get_nearest_neighbor(points):
@@ -220,17 +234,16 @@ def get_optimize_path(best_path, best_distance):
     # remove end point from best path
     best_path.pop(-1)
     # define variables
-    new_path=best_path; new_distance=best_distance    
+    new_path=[]; new_distance=0; temp_distance=0
+    # while loop  
     # exchange of elements in the field        
-    for i in range(0,len(best_path)-1,1):        
+    for i in range(0,len(best_path)-5,1):        
         # get permutations
-        index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5
-        if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
-        if index_2>len(best_path)-1: index_2=index_2-len(best_path)+1
-        if index_3>len(best_path)-1: index_3=index_3-len(best_path)+1
-        if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1
-        if index_5>len(best_path)-1: index_5=index_5-len(best_path)+1                           
-        combin=list(permutations((index_1, index_2, index_3, index_4, index_5),5))                    
+        index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5        
+        if index_5>len(best_path)-1: index_5=index_5-len(best_path)+1
+        combin=list(permutations((index_1, index_2, index_3,index_4),4))
+        # get temp distance        
+        temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])                    
         for j in range(0,len(combin)-1):
             # get new path
             new_path=best_path[:]
@@ -238,17 +251,20 @@ def get_optimize_path(best_path, best_distance):
             new_path[index_2]=best_path[combin[j][1]]
             new_path[index_3]=best_path[combin[j][2]]
             new_path[index_4]=best_path[combin[j][3]]
-            new_path[index_5]=best_path[combin[j][4]]
             # get new distance
-            new_distance=get_distance(new_path[0],new_path[-1])
-            for k in range(len(new_path)-1):
-                new_distance+=get_distance(new_path[k],new_path[k+1])
-            # if new distance is better than best distance
-            if new_distance<best_distance:
+            new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])            
+            # if new distance is better than temp distance
+            if new_distance<temp_distance:
                 best_path=new_path[:]
-                best_distance=new_distance
+                temp_distance=new_distance                
+    # get best distance
+    best_distance=get_distance(best_path[0],best_path[-1])
+    # cykle for best distance
+    for i in range(len(best_path)-1):        
+        best_distance+=get_distance(best_path[i],best_path[i+1])
     # append first point to the end of the list
-    best_path.append(best_path[0])                                 
+    best_path.append(best_path[0])
+                                     
     return best_path, best_distance
 
 # Infinite while loop console. Main program
@@ -263,7 +279,12 @@ while True:
     print("Random points:")
     print(points)
     # call function for simulated annealing
-    best_path,best_distance=get_simulated_annealing(points)            
+    best_path,best_distance=get_simulated_annealing(points)
+    for i in range(num[1]):
+        # call function for simulated annealing
+        new_path,new_distance=get_simulated_annealing(best_path)
+        if new_distance<best_distance:
+            best_path,best_distance=new_path,new_distance                
     print("Best path -simulated annealing:")
     print(best_path)
     print(f'Best distance -simulated annealing: {best_distance}')    
@@ -291,14 +312,13 @@ while True:
     plt.title("Plot of best path : optimal nearest neighbor")
     plt.grid(True)
     plt.plot([x for (x,y) in optimal_path[0]],[y for (x,y) in optimal_path[0]],'ko-')
-    plt.show()
-    
+    plt.show()    
     # call function for permutation
-    best_path_criss_cross=get_optimize_path(optimal_path[0],optimal_path[1])
+    best_path_permutation=get_optimize_path(optimal_path[0],optimal_path[1])
     print("Best path -optimize optimal nearest neighbor:")
-    print(best_path_criss_cross)
-    # plot best path for criss-cross algorithm
-    plt.title("Plot of best path : Optimize optimal nearest neighbor")
+    print(best_path_permutation)
+    # plot best path for permutation algorithm
+    plt.title("Plot of best path : optimize optimal nearest neighbor")
     plt.grid(True)
-    plt.plot([x for (x,y) in best_path_criss_cross[0]],[y for (x,y) in best_path_criss_cross[0]],'ko-')
-    plt.show()   
+    plt.plot([x for (x,y) in best_path_permutation[0]],[y for (x,y) in best_path_permutation[0]],'ko-')
+    plt.show()    
