@@ -44,6 +44,16 @@ def get_random_points(num_points):
         points.append((x,y))
     return points
 
+# function check double points in the list
+def check_double_points(points):    
+    unique_list = []
+    for item in points:
+        if item not in unique_list:
+            unique_list.append(item)
+    # append first point to the end of the list
+    unique_list.append(unique_list[0])
+    return unique_list    
+
 # function for distance between two points
 def get_distance(point1,point2):
     return math.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2)
@@ -211,65 +221,114 @@ def get_simulated_annealing(points):
         T=T*alpha
     # append first point to the end of the list
     best_path.append(best_path[0])
-    return best_path, best_distance
+    return best_path,best_distance
 
 # optimize permutations best path
-def get_optimize_path(best_path, best_distance):    
+def get_optimize_path(best_path):    
     # define variables
     new_path=[]; new_distance=0; temp_distance=0
     # while loop
-    if len(points)<=250:
+    if len(best_path)<=500:
         # exchange of elements in the field        
-        for i in range(0,len(best_path)-7,1):
+        for i in range(0,len(best_path)-1,1):
             # get permutations
             index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5; index_6=i+6; index_7=i+7            
+            if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
+            if index_2>len(best_path)-1: index_2=index_2-len(best_path)+1
+            if index_3>len(best_path)-1: index_3=index_3-len(best_path)+1
+            if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1
+            if index_5>len(best_path)-1: index_5=index_5-len(best_path)+1
+            if index_6>len(best_path)-1: index_6=index_6-len(best_path)+1
             if index_7>len(best_path)-1: index_7=index_7-len(best_path)+1
             combin=list(permutations((index_1,index_2,index_3,index_4,index_5,index_6),6))
-            # get temp distance
-            temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])+get_distance(best_path[index_5],best_path[index_6])+get_distance(best_path[index_6],best_path[index_7])
-            for j in range(0,len(combin)-1):
-                # get new path
-                new_path=best_path[:]
-                new_path[index_1]=best_path[combin[j][0]]
-                new_path[index_2]=best_path[combin[j][1]]
-                new_path[index_3]=best_path[combin[j][2]]
-                new_path[index_4]=best_path[combin[j][3]]
-                new_path[index_5]=best_path[combin[j][4]]
-                new_path[index_6]=best_path[combin[j][5]]
-                # get new distance
-                new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])+get_distance(new_path[index_5],new_path[index_6])+get_distance(new_path[index_6],new_path[index_7])
-                # if new distance is better than temp distance
-                if new_distance<temp_distance:
-                    temp_distance=new_distance
-                    best_path=new_path[:]                    
+            if i<=len(best_path)-7:
+                # get temp distance
+                temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])+get_distance(best_path[index_5],best_path[index_6])+get_distance(best_path[index_6],best_path[index_7])
+                for j in range(0,len(combin)-1):
+                    # get new path
+                    new_path=best_path[:]
+                    new_path[index_1]=best_path[combin[j][0]]
+                    new_path[index_2]=best_path[combin[j][1]]
+                    new_path[index_3]=best_path[combin[j][2]]
+                    new_path[index_4]=best_path[combin[j][3]]
+                    new_path[index_5]=best_path[combin[j][4]]
+                    new_path[index_6]=best_path[combin[j][5]]
+                    # get new distance
+                    new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])+get_distance(new_path[index_5],new_path[index_6])+get_distance(new_path[index_6],new_path[index_7])
+                    # if new distance is better than temp distance
+                    if new_distance<temp_distance:
+                        temp_distance=new_distance
+                        best_path=new_path[:]
+            else:
+                # get temp distance
+                temp_distance=get_distance(best_path[0],best_path[-1])
+                for k in range(0,len(best_path)-1):
+                    temp_distance+=get_distance(best_path[k],best_path[k+1])
+                for j in range(0,len(combin)-1):
+                    # get new path
+                    new_path=best_path[:]
+                    new_path[index_1]=best_path[combin[j][0]]
+                    new_path[index_2]=best_path[combin[j][1]]
+                    new_path[index_3]=best_path[combin[j][2]]
+                    new_path[index_4]=best_path[combin[j][3]]
+                    new_path[index_5]=best_path[combin[j][4]]
+                    new_path[index_6]=best_path[combin[j][5]]
+                    # cykle for new distance
+                    new_distance=get_distance(new_path[0],new_path[-1])
+                    for k in range(0,len(new_path)-1):
+                        new_distance+=get_distance(new_path[k],new_path[k+1])
+                    # if new distance is better than temp distance
+                    if new_distance<temp_distance:
+                        temp_distance=new_distance                        
+                        best_path=new_path[:]                                                       
     else:  
         # exchange of elements in the field        
         for i in range(0,len(best_path)-5,1):        
             # get permutations
-            index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5            
+            index_1=i+1; index_2=i+2; index_3=i+3; index_4=i+4; index_5=i+5
+            if index_1>len(best_path)-1: index_1=index_1-len(best_path)+1
+            if index_2>len(best_path)-1: index_2=index_2-len(best_path)+1
+            if index_3>len(best_path)-1: index_3=index_3-len(best_path)+1
+            if index_4>len(best_path)-1: index_4=index_4-len(best_path)+1            
             if index_5>len(best_path)-1: index_5=index_5-len(best_path)+1
             combin=list(permutations((index_1, index_2, index_3,index_4),4))
-            # get temp distance        
-            temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])                    
-            for j in range(0,len(combin)-1):
-                # get new path
-                new_path=best_path[:]
-                new_path[index_1]=best_path[combin[j][0]]
-                new_path[index_2]=best_path[combin[j][1]]
-                new_path[index_3]=best_path[combin[j][2]]
-                new_path[index_4]=best_path[combin[j][3]]
-                # get new distance
-                new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])            
-                # if new distance is better than temp distance
-                if new_distance<temp_distance:
-                    best_path=new_path[:]
-                    temp_distance=new_distance    
-    # get best distance
-    best_distance=0
-    # cykle for best distance
-    for i in range(len(best_path)-1):        
-        best_distance+=get_distance(best_path[i],best_path[i+1])                                         
-    return best_path, best_distance
+            if i<=len(best_path)-5:
+                # get temp distance
+                temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])
+                for j in range(0,len(combin)-1):
+                    # get new path
+                    new_path=best_path[:]
+                    new_path[index_1]=best_path[combin[j][0]]
+                    new_path[index_2]=best_path[combin[j][1]]
+                    new_path[index_3]=best_path[combin[j][2]]
+                    new_path[index_4]=best_path[combin[j][3]]
+                    # get new distance
+                    new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])
+                    # if new distance is better than temp distance
+                    if new_distance<temp_distance:
+                        temp_distance=new_distance
+                        best_path=new_path[:]
+            else:
+                # get temp distance
+                temp_distance=get_distance(best_path[0],best_path[-1])
+                for k in range(0,len(best_path)-1):
+                    temp_distance+=get_distance(best_path[k],best_path[k+1])
+                for j in range(0,len(combin)-1):
+                    # get new path
+                    new_path=best_path[:]
+                    new_path[index_1]=best_path[combin[j][0]]
+                    new_path[index_2]=best_path[combin[j][1]]
+                    new_path[index_3]=best_path[combin[j][2]]
+                    new_path[index_4]=best_path[combin[j][3]]
+                    # cykle for new distance
+                    new_distance=get_distance(new_path[0],new_path[-1])
+                    for k in range(0,len(new_path)-1):
+                        new_distance+=get_distance(new_path[k],new_path[k+1])
+                    # if new distance is better than temp distance
+                    if new_distance<temp_distance:
+                        temp_distance=new_distance                        
+                        best_path=new_path[:]                                             
+    return best_path,temp_distance
 
 # Infinite while loop console. Main program
 while True:
@@ -289,6 +348,8 @@ while True:
         new_path,new_distance=get_simulated_annealing(best_path)
         if new_distance<best_distance:
             best_path,best_distance=new_path,new_distance                
+    # delete double points
+    best_path=check_double_points(best_path)
     print("Best path -simulated annealing:")
     print(best_path)
     print(f'Best distance -simulated annealing: {best_distance}')    
@@ -299,17 +360,20 @@ while True:
     plt.show()
                 
     # call function for optimal nearest neighbor
-    optimal_path=get_optimal_nearest_neighbor(points)    
+    optimal_path=get_optimal_nearest_neighbor(points)
+    print("Best path - optimal nearest neighbor:")
+    print(optimal_path[0])
+    print(f'Best distance -optimal nearest neighbor: {optimal_path[1]}')        
+    # plot best path for optimal nearest neighbor
+    plt.title("Plot of best path : optimal nearest neighbor")
+    plt.grid(True)
+    plt.plot([x for (x,y) in optimal_path[0]],[y for (x,y) in optimal_path[0]],'ko-')
+    plt.show()    
     # call function for permutation
-    new_path_permutation=get_optimize_path(optimal_path[0],optimal_path[1])    
-    # reverse new_path_permutation to list
-    temp_path_permutation=new_path_permutation[0][::-1]    
-    # call function for permutation
-    temp_path_permutation=get_optimize_path(temp_path_permutation,new_path_permutation[1])
-    if new_path_permutation[1]<temp_path_permutation[1]:
-        best_path_permutation=new_path_permutation
-    else:
-        best_path_permutation=temp_path_permutation    
+    best_path_permutation=get_optimize_path(optimal_path[0])      
+    # delete double points
+    best_path_correction=check_double_points(best_path_permutation[0])
+    best_path_permutation=[best_path_correction,best_path_permutation[1]]    
     # call intercection function    
     intersection=check_intersection(best_path_permutation[0])
     if intersection[1]!=0 and intersection[2]!=0:        
@@ -321,23 +385,37 @@ while True:
         intersection=check_intersection(field_points[0])
         if intersection[1]!=0 and intersection[2]!=0:
             field_points=exchange_intersecting_lines(intersection[0], intersection[1], intersection[2])
+            # delete double points
+            best_path_correction=check_double_points(field_points[0])
+            field_points=[best_path_correction,field_points[1]]
         else:            
             break              
+    print("Best path -intersection:")
+    print(field_points[0])
+    print(f'Best distance -intersection: {field_points[1]}')
+    # plot best path intercection function
+    plt.title("Plot of best path : intersection")
+    plt.grid(True)
+    plt.plot([x for (x,y) in field_points[0]],[y for (x,y) in field_points[0]],'ko-')
+    plt.show()        
     # call function for permutation
-    new_path_permutation=get_optimize_path(field_points[0],field_points[1])
-    # reverse new_path_permutation to list
-    temp_path_permutation=new_path_permutation[0][::-1]    
-    # call function for permutation
-    temp_path_permutation=get_optimize_path(temp_path_permutation,new_path_permutation[1])
-    if new_path_permutation[1]<temp_path_permutation[1]:
-        best_path_permutation=new_path_permutation
-    else:
-        best_path_permutation=temp_path_permutation    
+    best_path_permutation=get_optimize_path(field_points[0])
+    # check intercection function
+    intersection=check_intersection(best_path_permutation[0])
+    while intersection[1]!=0 and intersection[2]!=0:
+        intersection=check_intersection(field_points[0])
+        if intersection[1]!=0 and intersection[2]!=0:
+            field_points=exchange_intersecting_lines(intersection[0], intersection[1], intersection[2])
+        else:            
+            break        
+    # delete double points
+    best_path_correction=check_double_points(field_points[0])
+    field_points=[best_path_correction,field_points[1]]
     print("Best path -optimize optimal NN:")
     print(field_points[0])
     print(f'Best distance -optimize optimal NN: {best_path_permutation[1]}')
     # plot best path intercection function
     plt.title("Plot of best path : optimize optimal NN")
     plt.grid(True)
-    plt.plot([x for (x,y) in best_path_permutation[0]],[y for (x,y) in best_path_permutation[0]],'ko-')
+    plt.plot([x for (x,y) in field_points[0]],[y for (x,y) in field_points[0]],'ko-')
     plt.show()   
