@@ -1,6 +1,7 @@
 import math
 import sys
 import matplotlib.pyplot as plt
+import numpy as np
 import random
 from itertools import permutations
 from shapely.geometry import LineString
@@ -40,17 +41,6 @@ def get_random_points(num_points):
         y=random.randint(1,1000)
         points.append((x,y))
     return points
-
-# function for distance all points 
-def matrix_points(points):
-    # initialize distance matrix
-    num_points = len(points)
-    dist_matrix = [[0] * num_points for i in range(num_points)]    
-    # calculate distances between points
-    for i in range(num_points):
-        for j in range(num_points):
-            dist_matrix[i][j] = math.dist(points[i], points[j])    
-    return dist_matrix
 
 # function check double points in the list
 def check_double_points(points):    
@@ -99,12 +89,17 @@ def exchange_intersecting_lines(points,lines1,lines2):
     distance=get_distance(points[0],points[-1])
     for i in range(len(points)-1):        
         distance+=get_distance(points[i],points[i+1])            
-    return points, distance
-    
+    return points, distance    
+
 # function for the nearest neighbor point with optimal path
 def get_optimal_nearest_neighbor(points):
+    # function for distance between two points
+    def get_distance(point1, point2):        
+        return math.sqrt((point1[0]-point2[0])**2+(point1[1]-point2[1])**2)
+    # function for nearest neighbor     
     def get_nearest_neighbor(current, points):
-        return min(points, key=lambda x: get_distance(current, x))
+        distances = [get_distance(current, point) for point in points]
+        return points[np.argmin(distances)]
     best_path = []
     best_distance = float("inf")
     if len(points) < 200:
@@ -125,8 +120,7 @@ def get_optimal_nearest_neighbor(points):
         for _ in range(200):
             start_point = random.choice(points)
             current_path = [start_point]
-            remaining_points = points[:]
-            remaining_points.remove(start_point)
+            remaining_points = [point for point in points if point != start_point]
             while remaining_points:
                 current = current_path[-1]
                 nearest = get_nearest_neighbor(current, remaining_points)
@@ -137,7 +131,7 @@ def get_optimal_nearest_neighbor(points):
             if current_distance < best_distance:
                 best_distance = current_distance
                 best_path = current_path
-    return best_path, best_distance   
+    return best_path, best_distance    
 
 # optimize permutations best path
 def get_optimize_path(best_path):    
@@ -158,7 +152,11 @@ def get_optimize_path(best_path):
         combin=list(permutations((index_1,index_2,index_3,index_4,index_5,index_6),6))
         if i<=len(best_path)-7:
             # get temp distance
-            temp_distance=get_distance(best_path[i],best_path[index_1])+get_distance(best_path[index_1],best_path[index_2])+get_distance(best_path[index_2],best_path[index_3])+get_distance(best_path[index_3],best_path[index_4])+get_distance(best_path[index_4],best_path[index_5])+get_distance(best_path[index_5],best_path[index_6])+get_distance(best_path[index_6],best_path[index_7])
+            indexes = [index_1, index_2, index_3, index_4, index_5, index_6, index_7]
+            temp_distance =get_distance(best_path[i],best_path[index_1]) 
+            for j in range(len(indexes) - 1):
+                temp_distance += get_distance(best_path[indexes[j]], best_path[indexes[j+1]])            
+            # get new path
             for j in range(0,len(combin)-1):
                 # get new path
                 new_path=best_path[:]
@@ -169,7 +167,9 @@ def get_optimize_path(best_path):
                 new_path[index_5]=best_path[combin[j][4]]
                 new_path[index_6]=best_path[combin[j][5]]
                 # get new distance
-                new_distance=get_distance(new_path[i],new_path[index_1])+get_distance(new_path[index_1],new_path[index_2])+get_distance(new_path[index_2],new_path[index_3])+get_distance(new_path[index_3],new_path[index_4])+get_distance(new_path[index_4],new_path[index_5])+get_distance(new_path[index_5],new_path[index_6])+get_distance(new_path[index_6],new_path[index_7])
+                new_distance=get_distance(new_path[i],new_path[index_1])
+                for k in range(len(indexes) - 1):
+                    new_distance += get_distance(new_path[indexes[k]], new_path[indexes[k+1]])                
                 # if new distance is better than temp distance
                 if new_distance<temp_distance:
                     temp_distance=new_distance
@@ -252,4 +252,4 @@ while True:
     plt.title("Plot of best path : optimize best NN")
     plt.grid(True)
     plt.plot([x for (x,y) in field_points[0]],[y for (x,y) in field_points[0]],'ko-')
-    plt.show()    
+    plt.show()
